@@ -503,3 +503,24 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
 .drink-page img{display:block;width:100%;height:auto;aspect-ratio:875/1240}
 @media (max-width:860px){.drink-pages{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.drink-pages,#p-vins .drink-pages{grid-template-columns:1fr;max-width:420px}}
+
+/* Plan interactif OpenStreetMap */
+.map .osm{position:absolute;inset:0;z-index:0;background:transparent}
+.map .osm.ready{background:#15171C}
+.map .osm .leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(.92) contrast(.9) sepia(.25)}
+.map .cover{z-index:1;pointer-events:none;place-items:start;padding:28px}
+.map .cover>div{pointer-events:auto;transform:none!important;max-width:340px}
+.map-credit{z-index:2}
+.bee-pin{background:#111214;border:2px solid #FDDA94;border-radius:50%;box-shadow:0 0 0 6px rgba(253,218,148,.25),0 8px 20px rgba(0,0,0,.45);display:grid;place-items:center}
+.bee-pin img{width:40px;height:40px;object-fit:contain}
+.map .leaflet-control-zoom{border:1px solid rgba(201,151,58,.55)!important;box-shadow:none}
+.map .leaflet-control-zoom a{background:#111214;color:#FDDA94;border-color:rgba(201,151,58,.35)}
+.map .leaflet-control-zoom a:hover{background:#2c2e33;color:#FDDA94}
+.map .leaflet-top.leaflet-left{left:auto;right:10px}
+.map .leaflet-top{top:10px}
+.map .leaflet-tooltip{background:#111214;color:#FDDA94;border:1px solid #C9973A;font-weight:600}
+.map .leaflet-tooltip-top:before{border-top-color:#C9973A}
+@media (max-width:700px){.map .cover{place-items:end center;padding:16px}.map .cover>div{max-width:none;width:100%}}
+.map .osm.ready{background:transparent}
+.map .leaflet-container{background:transparent;font-family:inherit}
+.map .cover>div{max-width:400px}

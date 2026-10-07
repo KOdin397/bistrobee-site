@@ -183,18 +183,37 @@ const CONFIG = {
     });
   });
 
-  /* Plan : chargé uniquement au clic (pas de cookies Google sans accord) */
-  const mapBtn = $("#loadMap");
-  if (mapBtn) mapBtn.addEventListener("click", () => {
-    const box = mapBtn.closest(".map");
-    const f = document.createElement("iframe");
-    f.title = "Plan d'accès au restaurant";
-    f.loading = "lazy";
-    f.referrerPolicy = "no-referrer-when-downgrade";
-    f.src = "https://maps.google.com/maps?q=45.8204651,4.7607888&z=15&output=embed";
-    box.appendChild(f);
-    $(".cover", box).hidden = true;
-  });
+  /* Plan interactif libre de droit : Leaflet (BSD) + fonds OpenStreetMap (ODbL).
+     Chargé seulement quand la carte arrive à l'écran. */
+  const osm = $("#osm");
+  if (osm) {
+    const LAT = 45.8204651, LNG = 4.7607888;
+    const boot = () => {
+      const css = document.createElement("link");
+      css.rel = "stylesheet"; css.href = "assets/leaflet/leaflet.css";
+      document.head.appendChild(css);
+      const js = document.createElement("script");
+      js.src = "assets/leaflet/leaflet.js";
+      js.onload = () => {
+        const L = window.L;
+        const touch = window.matchMedia("(pointer:coarse)").matches;
+        const map = L.map(osm, { scrollWheelZoom: false, dragging: !touch, tap: false, zoomControl: true, attributionControl: false })
+          .setView([LAT, LNG], 15);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+        const icon = L.divIcon({ className: "bee-pin", html: '<img src="assets/logo-bistrobee-small.png" alt="">', iconSize: [54, 54], iconAnchor: [27, 27] });
+        L.marker([LAT, LNG], { icon, title: "Bistrobee" }).addTo(map)
+          .bindTooltip("Bistrobee", { direction: "top", offset: [0, -28] });
+        osm.classList.add("ready");
+        const fit = () => map.invalidateSize();
+        window.addEventListener("resize", fit);
+      };
+      document.body.appendChild(js);
+    };
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: "300px" });
+      io.observe(osm);
+    } else boot();
+  }
 
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());
