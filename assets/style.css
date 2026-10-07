@@ -494,3 +494,12 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
 @media (max-width:760px){.ev-cta-grid{grid-template-columns:1fr}.ev-cta-in{padding:70px 20px 80px}}
 .ev-cta a.ev-contact{color:#FDDA94}
 .ev-cta a.ev-contact-main{color:#111214}
+
+/* Carte des boissons : pages du PDF */
+.drink-pages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;max-width:1100px;margin:10px auto 0}
+#p-vins .drink-pages{grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px}
+.drink-page{display:block;background:#fff;box-shadow:0 14px 34px rgba(17,18,20,.12);border:1px solid #ECE8DE;transition:transform .2s,box-shadow .2s}
+.drink-page:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(17,18,20,.18)}
+.drink-page img{display:block;width:100%;height:auto;aspect-ratio:875/1240}
+@media (max-width:860px){.drink-pages{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.drink-pages,#p-vins .drink-pages{grid-template-columns:1fr;max-width:420px}}
