@@ -292,6 +292,17 @@ const CONFIG = {
     if (location.hash) history.replaceState(null, "", location.pathname + location.search);
   }));
 
+  /* Téléphone : la barre d'actions s'efface sur le formulaire de réservation et dans la visionneuse */
+  const mbar = $(".mbar");
+  if (mbar) {
+    const resa = $("#reserver");
+    const hideOn = new Set();
+    const upd = () => mbar.classList.toggle("away", hideOn.size > 0 || document.documentElement.classList.contains("v-lock"));
+    if (resa && "IntersectionObserver" in window) new IntersectionObserver(es => es.forEach(e => { e.isIntersecting ? hideOn.add("resa") : hideOn.delete("resa"); upd(); }), { threshold: 0.15 }).observe(resa);
+    new MutationObserver(upd).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    $$("input,select,textarea").forEach(f => { f.addEventListener("focus", () => { hideOn.add("kb"); upd(); }); f.addEventListener("blur", () => { hideOn.delete("kb"); upd(); }); });
+  }
+
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());
 })();

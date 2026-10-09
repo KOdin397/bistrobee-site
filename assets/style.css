@@ -579,3 +579,31 @@ html.v-lock{overflow:hidden}
 .check input[aria-invalid=true]{outline:2px solid #E5533D;outline-offset:2px}
 .check:has(input[aria-invalid=true]){color:#E5533D}
 .news .check:has(input[aria-invalid=true]){color:#FFB4A6}
+
+/* ===== Téléphone : barre d'actions + zones tactiles ===== */
+.mbar{display:none}
+@media (max-width:760px){
+  .mbar{display:grid;grid-template-columns:1fr 1.25fr 1fr;position:fixed;left:0;right:0;bottom:0;z-index:900;background:#111214;border-top:1px solid rgba(201,151,58,.45);padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:6px;transition:transform .25s}
+  .mbar-a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;color:#FDDA94;text-decoration:none;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .mbar-a svg{width:22px;height:22px;fill:currentColor}
+  .mbar-main{background:#FDDA94;color:#111214}
+  .mbar.away{transform:translateY(110%)}
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+  html{scroll-padding-top:90px}
+  /* onglets des cartes en grille 2 × 2 */
+  .menus .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:22px 0 30px}
+  .menus .tab{min-height:48px;padding:8px 6px;border:1px solid #E2DED5;border-bottom-width:1px;font-size:.8rem;letter-spacing:.06em;line-height:1.2}
+  .menus .tab[aria-selected="true"]{background:#111214;color:#FDDA94;border-color:#111214!important}
+  .menu-page .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .menu-page .tabs .tab{min-height:48px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid #E2DED5;padding:8px 6px;font-size:.8rem;letter-spacing:.06em}
+  /* liens plus faciles à toucher */
+  .tile-a a,.pdf-dl,.site-footer .bottom a,.site-footer address a,.ig-handle,.resa a[href^="mailto"]{display:inline-flex;align-items:center;min-height:44px}
+  .check{min-height:44px;align-items:center}
+  .viewer{padding-bottom:0}
+  .v-prev,.v-next{width:52px;height:52px}
+  .v-close{width:52px;height:52px}
+}
+@media (max-width:760px){
+  .site-footer .ig-handle{display:flex;width:max-content}
+  .site-footer .bottom{align-items:center}
+}
