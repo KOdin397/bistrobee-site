@@ -278,6 +278,16 @@ const CONFIG = {
     if (window.self !== window.top) $$(".pdf-dl").forEach(a => a.hidden = true);
   })();
 
+  /* Accueil / logo sur la page d'accueil : on remonte en douceur au lieu de recharger */
+  const onHome = /(^|\/)(index\.html)?$/.test(location.pathname) || !!$(".hero");
+  if (onHome) $$('a[href="index.html"]').forEach(a => a.addEventListener("click", e => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, left: 0, behavior: smooth ? "smooth" : "auto" });
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  }));
+
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());
 })();
