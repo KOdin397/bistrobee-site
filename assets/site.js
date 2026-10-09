@@ -14,7 +14,7 @@ const CONFIG = {
   ],
   // Samedi (6) et dimanche (0) : ouvert seulement pendant les mois de la saison
   WEEKEND_DAYS: [0, 6],
-  WEEKEND_SEASON_MONTHS: [5, 6, 7, 8, 9, 10],   // mai à octobre
+  WEEKEND_SEASON_MONTHS: [5, 6, 7, 8, 9],   // mai à septembre
   MAX_GUESTS_ONLINE: 12                 // au-delà : on invite à téléphoner
 };
 
@@ -117,7 +117,7 @@ const CONFIG = {
     if (!dateIn.value) return;
     const d = new Date(dateIn.value + "T12:00:00");
     const n = parisNow();
-    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = '<option value="">Fermé le week-end de novembre à avril</option>'; return; }
+    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = '<option value="">Fermé le week-end d’octobre à avril</option>'; return; }
     CONFIG.SERVICES.forEach(s => {
       const g = document.createElement("optgroup"); g.label = s.name;
       for (let m = toMin(s.open); m <= toMin(s.lastBooking); m += 15) {
