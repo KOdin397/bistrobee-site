@@ -570,3 +570,12 @@ html.v-lock{overflow:hidden}
 @media (max-width:700px){.v-stage img{max-width:96vw;max-height:none}.v-stage{padding:60px 0 50px}.v-prev,.v-next{top:auto;bottom:6px;transform:none;width:44px;height:44px;font-size:1.8rem}.v-count{bottom:18px}}
 .v-count{pointer-events:none}
 @media (max-width:700px){.v-count{left:60px;right:60px}}
+
+/* Recette : lisibilité newsletter + case d'accord en erreur */
+.news::before{background:linear-gradient(rgba(17,18,20,.72),rgba(17,18,20,.62))}
+.news p{text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.news .check{font-size:.85rem;align-items:center;gap:8px}
+.check input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:#C9973A}
+.check input[aria-invalid=true]{outline:2px solid #E5533D;outline-offset:2px}
+.check:has(input[aria-invalid=true]){color:#E5533D}
+.news .check:has(input[aria-invalid=true]){color:#FFB4A6}

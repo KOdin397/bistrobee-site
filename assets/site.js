@@ -162,7 +162,11 @@ const CONFIG = {
       e.preventDefault();
       const kind = form.dataset.kind;
       const bad = validate(form);
-      if (bad) { say(form, "Merci de compléter les champs en rouge.", true); bad.focus(); return; }
+      if (bad) {
+        const onlyBox = $$("[aria-invalid=true]", form).every(f => f.type === "checkbox");
+        say(form, onlyBox ? "Merci de cocher la case d'accord pour continuer." : "Merci de compléter les champs en rouge.", true);
+        bad.focus(); return;
+      }
       if (kind === "reservation" && guests && +guests.value > CONFIG.MAX_GUESTS_ONLINE) {
         say(form, `Pour un groupe de plus de ${CONFIG.MAX_GUESTS_ONLINE} personnes, appelez-nous au <strong>${CONFIG.PHONE}</strong>.`, true); return;
       }
