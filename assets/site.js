@@ -12,9 +12,9 @@ const CONFIG = {
     { name: "Midi", open: "12:00", close: "14:00", lastBooking: "13:30" },
     { name: "Soir", open: "19:00", close: "22:00", lastBooking: "21:30" }
   ],
-  // Samedi (6) et dimanche (0) : ouvert seulement pendant les mois de la saison
+  // Samedi (6) et dimanche (0) : ouverts sauf en octobre et novembre
   WEEKEND_DAYS: [0, 6],
-  WEEKEND_SEASON_MONTHS: [5, 6, 7, 8, 9],   // mai à septembre
+  WEEKEND_SEASON_MONTHS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 12],   // week-ends ouverts sauf octobre et novembre
   MAX_GUESTS_ONLINE: 12                 // au-delà : on invite à téléphoner
 };
 
@@ -117,7 +117,7 @@ const CONFIG = {
     if (!dateIn.value) return;
     const d = new Date(dateIn.value + "T12:00:00");
     const n = parisNow();
-    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = '<option value="">Fermé le week-end d’octobre à avril</option>'; return; }
+    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = '<option value="">Fermé le week-end en octobre et novembre</option>'; return; }
     CONFIG.SERVICES.forEach(s => {
       const g = document.createElement("optgroup"); g.label = s.name;
       for (let m = toMin(s.open); m <= toMin(s.lastBooking); m += 15) {
