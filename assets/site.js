@@ -69,14 +69,38 @@ const CONFIG = {
     return { date: `${g("year")}-${g("month")}-${g("day")}`, min: (+g("hour") % 24) * 60 + +g("minute"), dow: days[g("weekday")] };
   }
 
-  /* Ouvert en ce moment */
+  /* Statut de la cuisine : ouverte jusqu'à…, ou réouverture à… */
   const st = $("#openStatus");
   if (st) {
     try {
       const n = parisNow();
-      const open = !isClosed(n.dow, +n.date.slice(5, 7)) && CONFIG.SERVICES.some(s => n.min >= toMin(s.open) && n.min < toMin(s.close));
-      st.classList.toggle("on", open);
-      st.lastElementChild.textContent = open ? "Ouvert en ce moment" : "Fermé en ce moment";
+      const month = +n.date.slice(5, 7);
+      const hh = m => { const h = Math.floor(m / 60), mi = m % 60; return h + "h" + (mi ? String(mi).padStart(2, "0") : ""); };
+      const DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+      const closedToday = isClosed(n.dow, month);
+      const cur = !closedToday && CONFIG.SERVICES.find(s => n.min >= toMin(s.open) && n.min < toMin(s.close));
+      let text;
+      if (cur) {
+        text = `Cuisine ouverte · jusqu'à ${hh(toMin(cur.close))}`;
+      } else {
+        const later = !closedToday && CONFIG.SERVICES.find(s => n.min < toMin(s.open));
+        if (later) {
+          text = `Cuisine fermée · réouverture à ${hh(toMin(later.open))}`;
+        } else {
+          const base = new Date(n.date + "T12:00:00");
+          let label = "";
+          for (let k = 1; k <= 7; k++) {
+            const d = new Date(base); d.setDate(base.getDate() + k);
+            if (!isClosed(d.getDay(), d.getMonth() + 1)) { label = k === 1 ? "demain" : DAYS[d.getDay()]; break; }
+          }
+          const first = hh(toMin(CONFIG.SERVICES[0].open));
+          text = (closedToday ? "Fermé aujourd'hui" : "Cuisine fermée") + ` · réouverture ${label} à ${first}`;
+        }
+      }
+      st.classList.toggle("on", !!cur);
+      /* la partie après « · » reste sur une seule ligne */
+      const parts = text.split(" · ");
+      st.lastElementChild.textContent = parts.length > 1 ? parts[0] + " · " + parts[1].replace(/ /g, "\u00a0") : text;
       st.hidden = false;
     } catch (e) { /* on laisse le statut caché */ }
   }
