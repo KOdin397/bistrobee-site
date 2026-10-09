@@ -59,7 +59,7 @@ const CONFIG = {
     });
   });
   $$("[data-tab]").forEach(a => a.addEventListener("click", () => showTab(a.dataset.tab)));
-  if (tabs.length) { const h = location.hash.replace("#", ""); if (["carte", "jour", "vins"].includes(h)) showTab(h); }
+  if (tabs.length) { const h = location.hash.replace("#", ""); if (["carte", "jour", "vins", "boissons"].includes(h)) showTab(h); }
 
   /* Heure de Paris */
   function parisNow() {
@@ -202,6 +202,14 @@ const CONFIG = {
     slot.addEventListener("click", () => slot.classList.add("on"));
     box.addEventListener("mouseleave", () => slot.classList.remove("on"));
   }
+
+  /* La carte : bascule Français / English */
+  $$(".lang-switch button").forEach(btn => btn.addEventListener("click", () => {
+    const sw = btn.parentElement, lang = btn.dataset.lang;
+    $$("button", sw).forEach(x => x.setAttribute("aria-pressed", x === btn));
+    let el = sw.nextElementSibling;
+    while (el && el.classList.contains("lang-pane")) { el.hidden = el.dataset.pane !== lang; el = el.nextElementSibling; }
+  }));
 
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());

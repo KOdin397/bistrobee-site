@@ -540,3 +540,12 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
   .map .acts{flex-wrap:nowrap}
   .map .acts .btn{padding-inline:14px;font-size:.78rem}
 }
+
+/* Cartes en visuel (PDF) */
+.drink-page img{aspect-ratio:auto}
+.drink-pages.a4{max-width:1180px}
+.menus .drink-pages{grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px}
+.lang-switch{display:flex;justify-content:center;gap:0;margin:0 auto 22px;width:max-content;border:1px solid var(--gold-deep)}
+.lang-switch button{font:inherit;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 22px;border:0;background:transparent;color:#111214;cursor:pointer}
+.lang-switch button[aria-pressed="true"]{background:#111214;color:#FDDA94}
+@media (max-width:520px){.menus .drink-pages{grid-template-columns:1fr;max-width:420px}}
