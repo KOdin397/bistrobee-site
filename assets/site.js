@@ -211,6 +211,49 @@ const CONFIG = {
     while (el && el.classList.contains("lang-pane")) { el.hidden = el.dataset.pane !== lang; el = el.nextElementSibling; }
   }));
 
+  /* Visionneuse plein écran des cartes (sans ouvrir de nouvel onglet) */
+  (function () {
+    const groups = $$(".drink-pages[data-all]");
+    if (!groups.length) return;
+    const box = document.createElement("div");
+    box.className = "viewer"; box.hidden = true;
+    box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Carte en grand");
+    box.innerHTML = '<button class="v-close" type="button" aria-label="Fermer">×</button>' +
+      '<button class="v-prev" type="button" aria-label="Page précédente">‹</button>' +
+      '<div class="v-stage"><img alt=""></div>' +
+      '<button class="v-next" type="button" aria-label="Page suivante">›</button>' +
+      '<p class="v-count"></p>';
+    document.body.appendChild(box);
+    const img = $("img", box), count = $(".v-count", box);
+    let list = [], alts = [], i = 0, last = null;
+    const show = () => { img.src = list[i]; img.alt = alts[i] || ""; count.textContent = `Page ${i + 1} / ${list.length}`;
+      $(".v-prev", box).hidden = i === 0; $(".v-next", box).hidden = i === list.length - 1; $(".v-stage", box).scrollTop = 0; };
+    const open = (g, src) => {
+      list = g.dataset.all.split(","); alts = (g.dataset.alts || "").split("|");
+      i = Math.max(0, list.indexOf(src)); last = document.activeElement;
+      show(); box.hidden = false; document.documentElement.classList.add("v-lock"); $(".v-close", box).focus();
+    };
+    const close = () => { box.hidden = true; document.documentElement.classList.remove("v-lock"); if (last) last.focus(); };
+    const go = d => { const n = i + d; if (n >= 0 && n < list.length) { i = n; show(); } };
+    groups.forEach(g => $$(".drink-page", g).forEach(a => a.addEventListener("click", e => { e.preventDefault(); open(g, a.dataset.src); })));
+    $$(".doc-open").forEach(btn => btn.addEventListener("click", () => {
+      const scope = btn.closest("section, [role=tabpanel]") || document;
+      const g = $$(".drink-pages[data-all]", scope).find(x => x.offsetParent !== null) || $(".drink-pages[data-all]", scope);
+      if (g) open(g, g.dataset.all.split(",")[0]);
+    }));
+    $(".v-close", box).addEventListener("click", close);
+    $(".v-prev", box).addEventListener("click", () => go(-1));
+    $(".v-next", box).addEventListener("click", () => go(1));
+    box.addEventListener("click", e => { if (e.target === box) close(); });
+    document.addEventListener("keydown", e => { if (box.hidden) return;
+      if (e.key === "Escape") close(); else if (e.key === "ArrowRight") go(1); else if (e.key === "ArrowLeft") go(-1); });
+    let x0 = null;
+    box.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1); x0 = null; });
+    /* Dans un aperçu encadré, le téléchargement est bloqué : on masque le lien */
+    if (window.self !== window.top) $$(".pdf-dl").forEach(a => a.hidden = true);
+  })();
+
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());
 })();
