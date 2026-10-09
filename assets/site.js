@@ -183,6 +183,26 @@ const CONFIG = {
     });
   });
 
+  /* Plan Google Maps : inséré seulement sur le vrai site (dans un aperçu
+     encadré, Google refuse de s'afficher : on garde alors le plan dessiné).
+     La carte ne capte la souris / le doigt qu'après un premier clic,
+     pour ne pas bloquer le défilement de la page. */
+  const slot = $(".gmap-slot");
+  if (slot && window.self === window.top) {
+    const f = document.createElement("iframe");
+    f.className = "gmap";
+    f.title = "Plan Google Maps : Bistrobee, Porte de Lyon à Dardilly";
+    f.loading = "lazy";
+    f.referrerPolicy = "no-referrer-when-downgrade";
+    f.allowFullscreen = true;
+    f.src = slot.dataset.src;
+    slot.appendChild(f);
+    const box = slot.closest(".map");
+    box.classList.add("has-gmap");
+    slot.addEventListener("click", () => slot.classList.add("on"));
+    box.addEventListener("mouseleave", () => slot.classList.remove("on"));
+  }
+
   /* Année du pied de page */
   $$(".year").forEach(y => y.textContent = new Date().getFullYear());
 })();

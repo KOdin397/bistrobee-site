@@ -527,3 +527,16 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
 
 /* Plan Google Maps */
 .map .gmap{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:0;filter:grayscale(.35) contrast(1.02)}
+
+.map .gmap-slot{position:absolute;inset:0;z-index:0;cursor:pointer}
+.map .gmap-slot .gmap{pointer-events:none}
+.map .gmap-slot.on .gmap{pointer-events:auto}
+.map.has-gmap{background:#E6E7E6}
+@media (max-width:700px){
+  .map{height:auto;display:flex;flex-direction:column;background-size:cover}
+  .map .gmap-slot{position:relative;inset:auto;height:340px;flex:none}
+  .map .cover{position:relative;inset:auto;padding:0}
+  .map .cover>div{width:100%;border-left:0;border-right:0;background:#111214}
+  .map .acts{flex-wrap:nowrap}
+  .map .acts .btn{padding-inline:14px;font-size:.78rem}
+}
