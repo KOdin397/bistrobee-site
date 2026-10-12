@@ -55,7 +55,7 @@ p{margin:0}
 @media (max-width:520px){.site-header .wrap{padding-inline:16px;height:76px}.nav{top:76px}.logo img{width:64px}.book-btn{padding:11px 12px;font-size:.78rem}}
 
 /* Grande photo */
-.hero{position:relative;height:min(820px,90vw);min-height:420px;background:#555 url("hero.jpg") center/cover no-repeat;display:grid;place-items:center;text-align:center;color:#fff}
+.hero{position:relative;height:min(820px,90vw);min-height:420px;background:#555 url("https://cdn.jsdelivr.net/gh/KOdin397/bistrobee-site@73604e1a4714d1d5ac8d514372e84107ecc707cc/assets/hero.jpg"), url("hero.jpg") center/cover no-repeat;display:grid;place-items:center;text-align:center;color:#fff}
 .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.45))}
 .hero .in{position:relative;display:grid;gap:4px;padding-inline:16px;transform:translateY(-6%)}
 .hero .kicker{font-weight:700;font-size:clamp(.8rem,1.2vw,1rem);letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.35)}
@@ -137,7 +137,7 @@ textarea{min-height:140px;resize:vertical}
 .booking .phone a{font-weight:700;color:var(--olive);text-decoration:none;white-space:nowrap}
 
 /* Newsletter */
-.news{position:relative;background:#555 url("hero.jpg") center 30%/cover no-repeat;color:#fff;text-align:center;padding-block:110px}
+.news{position:relative;background:#555 url("https://cdn.jsdelivr.net/gh/KOdin397/bistrobee-site@73604e1a4714d1d5ac8d514372e84107ecc707cc/assets/hero.jpg"), url("hero.jpg") center 30%/cover no-repeat;color:#fff;text-align:center;padding-block:110px}
 .news::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45)}
 .news .in{position:relative;max-width:700px;margin-inline:auto;padding-inline:16px;display:grid;gap:10px;justify-items:center}
 .news h2{font-family:var(--f-serif);font-weight:400;font-size:1.75rem;margin:0}
@@ -281,7 +281,7 @@ textarea{min-height:140px;resize:vertical}
 
 /* Grande photo d'accueil : déroulement au défilement */
 .hero{background:#1d1e20;isolation:isolate;overflow:hidden}
-.hero-bg{position:absolute;inset:-12% 0 -12% 0;background:url("hero.jpg") center/cover no-repeat;z-index:0;will-change:transform;transform:translate3d(0,0,0) scale(1.08);animation:hero-in 1.8s cubic-bezier(.2,.7,.2,1) both}
+.hero-bg{position:absolute;inset:-12% 0 -12% 0;background:url("https://cdn.jsdelivr.net/gh/KOdin397/bistrobee-site@73604e1a4714d1d5ac8d514372e84107ecc707cc/assets/hero.jpg"), url("hero.jpg") center/cover no-repeat;z-index:0;will-change:transform;transform:translate3d(0,0,0) scale(1.08);animation:hero-in 1.8s cubic-bezier(.2,.7,.2,1) both}
 .hero::before{z-index:1;background:rgba(0,0,0,var(--shade,.2))!important}
 .hero .in{z-index:2;will-change:transform,opacity}
 .hero .in>*{animation:hero-up 1s cubic-bezier(.2,.7,.2,1) both}
@@ -386,7 +386,7 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
 .resa-card .check a{color:var(--gold-deep)}
 
 /* Plan d'accès dessiné (données OpenStreetMap) */
-.map{height:520px;background:#15171C url("plan-acces.svg") center/cover no-repeat}
+.map{height:520px;background:#15171C url("https://cdn.jsdelivr.net/gh/KOdin397/bistrobee-site@73604e1a4714d1d5ac8d514372e84107ecc707cc/assets/plan-acces.svg"), url("plan-acces.svg") center/cover no-repeat}
 .map .cover{display:grid;place-items:center;padding-inline:16px}
 .map .cover>div{background:rgba(17,18,20,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(201,151,58,.55);padding:26px 30px;text-align:center;transform:translate(clamp(-260px,-14vw,0px),-120px)}
 .map .pin{display:none}
@@ -407,7 +407,7 @@ section.resa{display:block;max-width:none;margin:0;grid-template-columns:none;ga
 @media (max-width:520px){.foot-logo{width:120px;height:120px}}
 
 /* ---------- Page Superchargeurs ---------- */
-.ev-hero{position:relative;color:#fff;background:#111214 url("hero.jpg") center/cover no-repeat;isolation:isolate;padding:110px 20px 90px}
+.ev-hero{position:relative;color:#fff;background:#111214 url("https://cdn.jsdelivr.net/gh/KOdin397/bistrobee-site@73604e1a4714d1d5ac8d514372e84107ecc707cc/assets/hero.jpg"), url("hero.jpg") center/cover no-repeat;isolation:isolate;padding:110px 20px 90px}
 .ev-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(17,18,20,.92) 0%,rgba(17,18,20,.7) 55%,rgba(17,18,20,.45) 100%);z-index:-1}
 .ev-hero-in{max-width:1180px;margin-inline:auto;display:grid;gap:16px}
 .ev-k{font-weight:700;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:#C9973A}

@@ -1,3 +1,12 @@
+/* Secours images CDN : si le serveur d'images (jsDelivr) ne répond pas,
+   on recharge l'image depuis le site lui-même. */
+document.addEventListener("error", function (e) {
+  var el = e.target;
+  if (el && el.tagName === "IMG" && /cdn\.jsdelivr\.net/.test(el.src)) {
+    el.src = "/assets/" + el.src.split("/").pop();
+  }
+}, true);
+
 /* Bistrobee — scripts du site
    ===========================================================
    RÉGLAGE À FAIRE UNE SEULE FOIS :
