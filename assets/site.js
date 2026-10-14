@@ -24,8 +24,32 @@ const CONFIG = {
   // Samedi (6) et dimanche (0) : ouverts sauf en octobre et novembre
   WEEKEND_DAYS: [0, 6],
   WEEKEND_SEASON_MONTHS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 12],   // week-ends ouverts sauf octobre et novembre
-  MAX_GUESTS_ONLINE: 12                 // au-delà : on invite à téléphoner
+  MAX_GUESTS_ONLINE: 12,                // au-delà : on invite à téléphoner
+  // Statistiques de visite sans cookie, envoyées au tableau de bord K'Odin
+  TRACK_URL: "https://k-odin.base44.app/functions/trackSiteEvent"
 };
+
+/* Statistiques sans cookie : aucune donnée personnelle, aucun identifiant stocké
+   sur l'appareil. On compte les pages vues et les actions (appel, itinéraire,
+   réservation…), avec la provenance et le type d'appareil. */
+const bbTrack = (function () {
+  const url = CONFIG.TRACK_URL;
+  const ref = (() => { try { const h = document.referrer ? new URL(document.referrer).hostname : ""; return h === location.hostname ? "" : h; } catch (e) { return ""; } })();
+  const utm = new URLSearchParams(location.search).get("utm_source") || "";
+  const device = window.matchMedia("(max-width: 760px)").matches ? "mobile" : (window.matchMedia("(max-width: 1100px)").matches ? "tablette" : "ordinateur");
+  return function (event, extra) {
+    if (!url || navigator.webdriver) return;
+    const body = JSON.stringify(Object.assign({ event: event, page: location.pathname, lang: document.documentElement.lang || "fr", referrer: ref, utm_source: utm, device: device, site: location.hostname }, extra || {}));
+    try { if (!(navigator.sendBeacon && navigator.sendBeacon(url, new Blob([body], { type: "text/plain" })))) fetch(url, { method: "POST", body: body, keepalive: true, headers: { "Content-Type": "text/plain" } }); } catch (e) {}
+  };
+})();
+if (!/^(localhost|127\.)/.test(location.hostname) && window.self === window.top) bbTrack("page_vue");
+document.addEventListener("click", function (e) {
+  const a = e.target.closest && e.target.closest("a"); if (!a) return;
+  const h = a.getAttribute("href") || "";
+  const ev = a.dataset.track || (h.startsWith("tel:") ? "appel" : h.startsWith("mailto:") ? "email" : /google\.[a-z]+\/maps\/dir/.test(h) ? "itineraire" : /instagram\.com/.test(h) ? "instagram" : /\.pdf$/.test(h) ? "pdf_carte" : "");
+  if (ev) bbTrack(ev, { target: a.dataset.track ? "" : h.slice(0, 120) });
+}, true);
 
 (function () {
   "use strict";
@@ -34,6 +58,9 @@ const CONFIG = {
   const toMin = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
   const isClosed = (dow, month) => CONFIG.WEEKEND_DAYS.includes(dow) && !CONFIG.WEEKEND_SEASON_MONTHS.includes(month);
   const configured = /@/.test(CONFIG.EMAIL) && !/exemple\.fr$/i.test(CONFIG.EMAIL);
+  /* Langue de la page : français par défaut, anglais sur /en/ */
+  const EN = document.documentElement.lang === "en";
+  const T = (fr, en) => (EN ? en : fr);
 
   /* Menu mobile */
   const burger = $("#burger"), nav = $("#nav");
@@ -84,26 +111,28 @@ const CONFIG = {
     try {
       const n = parisNow();
       const month = +n.date.slice(5, 7);
-      const hh = m => { const h = Math.floor(m / 60), mi = m % 60; return h + "h" + (mi ? String(mi).padStart(2, "0") : ""); };
-      const DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+      const hh = m => { const h = Math.floor(m / 60), mi = m % 60;
+        if (EN) { const h12 = h % 12 || 12; return h12 + (mi ? ":" + String(mi).padStart(2, "0") : "") + (h < 12 ? "am" : "pm"); }
+        return h + "h" + (mi ? String(mi).padStart(2, "0") : ""); };
+      const DAYS = T(["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]);
       const closedToday = isClosed(n.dow, month);
       const cur = !closedToday && CONFIG.SERVICES.find(s => n.min >= toMin(s.open) && n.min < toMin(s.close));
       let text;
       if (cur) {
-        text = `Cuisine ouverte · jusqu'à ${hh(toMin(cur.close))}`;
+        text = T(`Cuisine ouverte · jusqu'à ${hh(toMin(cur.close))}`, `Kitchen open · until ${hh(toMin(cur.close))}`);
       } else {
         const later = !closedToday && CONFIG.SERVICES.find(s => n.min < toMin(s.open));
         if (later) {
-          text = `Cuisine fermée · réouverture à ${hh(toMin(later.open))}`;
+          text = T(`Cuisine fermée · réouverture à ${hh(toMin(later.open))}`, `Kitchen closed · reopens at ${hh(toMin(later.open))}`);
         } else {
           const base = new Date(n.date + "T12:00:00");
           let label = "";
           for (let k = 1; k <= 7; k++) {
             const d = new Date(base); d.setDate(base.getDate() + k);
-            if (!isClosed(d.getDay(), d.getMonth() + 1)) { label = k === 1 ? "demain" : DAYS[d.getDay()]; break; }
+            if (!isClosed(d.getDay(), d.getMonth() + 1)) { label = k === 1 ? T("demain", "tomorrow") : DAYS[d.getDay()]; break; }
           }
           const first = hh(toMin(CONFIG.SERVICES[0].open));
-          text = (closedToday ? "Fermé aujourd'hui" : "Cuisine fermée") + ` · réouverture ${label} à ${first}`;
+          text = EN ? (closedToday ? "Closed today" : "Kitchen closed") + ` · reopens ${label} at ${first}` : (closedToday ? "Fermé aujourd'hui" : "Cuisine fermée") + ` · réouverture ${label} à ${first}`;
         }
       }
       st.classList.toggle("on", !!cur);
@@ -122,21 +151,21 @@ const CONFIG = {
   function fillSlots() {
     if (!dateIn || !timeSel) return;
     const keep = timeSel.value;
-    timeSel.innerHTML = '<option value="">Choisir…</option>';
+    timeSel.innerHTML = `<option value="">${T("Choisir…", "Choose…")}</option>`;
     if (!dateIn.value) return;
     const d = new Date(dateIn.value + "T12:00:00");
     const n = parisNow();
-    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = '<option value="">Fermé le week-end en octobre et novembre</option>'; return; }
+    if (isClosed(d.getDay(), d.getMonth() + 1)) { timeSel.innerHTML = `<option value="">${T("Fermé le week-end en octobre et novembre", "Closed at weekends in October and November")}</option>`; return; }
     CONFIG.SERVICES.forEach(s => {
-      const g = document.createElement("optgroup"); g.label = s.name;
+      const g = document.createElement("optgroup"); g.label = T(s.name, s.name === "Midi" ? "Lunch" : "Dinner");
       for (let m = toMin(s.open); m <= toMin(s.lastBooking); m += 15) {
         if (dateIn.value === n.date && m <= n.min + 30) continue;
         const v = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
-        const o = document.createElement("option"); o.value = v; o.textContent = v.replace(":", "h"); g.appendChild(o);
+        const o = document.createElement("option"); o.value = v; o.textContent = EN ? v : v.replace(":", "h"); g.appendChild(o);
       }
       if (g.children.length) timeSel.appendChild(g);
     });
-    if (timeSel.options.length === 1) timeSel.innerHTML = '<option value="">Plus de créneau ce jour</option>';
+    if (timeSel.options.length === 1) timeSel.innerHTML = `<option value="">${T("Plus de créneau ce jour", "No more times today")}</option>`;
     if ([...timeSel.options].some(o => o.value === keep)) timeSel.value = keep;
   }
   if (dateIn) {
@@ -173,11 +202,11 @@ const CONFIG = {
       const bad = validate(form);
       if (bad) {
         const onlyBox = $$("[aria-invalid=true]", form).every(f => f.type === "checkbox");
-        say(form, onlyBox ? "Merci de cocher la case d'accord pour continuer." : "Merci de compléter les champs en rouge.", true);
+        say(form, onlyBox ? T("Merci de cocher la case d'accord pour continuer.", "Please tick the consent box to continue.") : T("Merci de compléter les champs en rouge.", "Please fill in the fields in red."), true);
         bad.focus(); return;
       }
       if (kind === "reservation" && guests && +guests.value > CONFIG.MAX_GUESTS_ONLINE) {
-        say(form, `Pour un groupe de plus de ${CONFIG.MAX_GUESTS_ONLINE} personnes, appelez-nous au <strong>${CONFIG.PHONE}</strong>.`, true); return;
+        say(form, T(`Pour un groupe de plus de ${CONFIG.MAX_GUESTS_ONLINE} personnes, appelez-nous au <strong>${CONFIG.PHONE}</strong>.`, `For groups of more than ${CONFIG.MAX_GUESTS_ONLINE}, please call us on <strong>+33 4 72 17 29 04</strong>.`), true); return;
       }
       if ($(".hp input", form) && $(".hp input", form).value) return; // robot
       if (!configured) {
@@ -186,7 +215,7 @@ const CONFIG = {
       const data = {};
       $$("input,select,textarea", form).forEach(f => { if (f.name && f.type !== "checkbox" && !f.closest(".hp")) data[f.name] = f.value.trim(); });
       const subjects = {
-        reservation: `Demande de réservation – ${data["Date"] || ""} ${data["Heure"] || ""} – ${data["Personnes"] || ""} pers.`,
+        reservation: (EN ? "[EN] " : "") + `Demande de réservation – ${data["Date"] || ""} ${data["Heure"] || ""} – ${data["Personnes"] || ""} pers.`,
         contact: `Message du site – ${data["Prénom"] || ""} ${data["Nom"] || ""}`,
         newsletter: "Inscription newsletter"
       };
@@ -195,7 +224,7 @@ const CONFIG = {
       data._captcha = "false";
       if (data["Email"]) data._replyto = data["Email"];
       const btn = $("button[type=submit]", form), label = btn.textContent;
-      btn.disabled = true; btn.textContent = "Envoi…";
+      btn.disabled = true; btn.textContent = T("Envoi…", "Sending…");
       try {
         const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 15000);
         const r = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(CONFIG.EMAIL), {
@@ -206,14 +235,15 @@ const CONFIG = {
         const j = await r.json().catch(() => ({}));
         if (!r.ok || String(j.success) !== "true") throw new Error(j.message || "Envoi refusé");
         const ok = {
-          reservation: "<strong>Merci !</strong> Votre demande de réservation est bien envoyée. Elle sera confirmée par téléphone ou par email. Pour une réservation le jour même, appelez-nous.",
-          contact: "<strong>Merci !</strong> Nous avons bien reçu votre message. Nous revenons vers vous au plus vite.",
-          newsletter: "Merci, votre inscription est enregistrée."
+          reservation: T("<strong>Merci !</strong> Votre demande de réservation est bien envoyée. Elle sera confirmée par téléphone ou par email. Pour une réservation le jour même, appelez-nous.", "<strong>Thank you!</strong> Your booking request has been sent. We will confirm it by phone or email. For a same-day booking, please call us."),
+          contact: T("<strong>Merci !</strong> Nous avons bien reçu votre message. Nous revenons vers vous au plus vite.", "<strong>Thank you!</strong> We have received your message and will reply shortly."),
+          newsletter: T("Merci, votre inscription est enregistrée.", "Thank you, you are now subscribed.")
         };
+        bbTrack(kind === "reservation" ? "reservation" : kind, kind === "reservation" ? { guests: +data["Personnes"] || 0, booking_date: data["Date"] || "" } : {});
         form.reset(); fillSlots();
         say(form, ok[kind]);
       } catch (err) {
-        say(form, `Le message n'a pas pu partir. Réessayez dans un instant ou appelez-nous au <strong>${CONFIG.PHONE}</strong>.`, true);
+        say(form, T(`Le message n'a pas pu partir. Réessayez dans un instant ou appelez-nous au <strong>${CONFIG.PHONE}</strong>.`, `Your message could not be sent. Please try again in a moment or call us on <strong>+33 4 72 17 29 04</strong>.`), true);
       } finally {
         btn.disabled = false; btn.textContent = label;
       }
@@ -228,7 +258,7 @@ const CONFIG = {
   if (slot && window.self === window.top) {
     const f = document.createElement("iframe");
     f.className = "gmap";
-    f.title = "Plan Google Maps : Bistrobee, Porte de Lyon à Dardilly";
+    f.title = T("Plan Google Maps : Bistrobee, Porte de Lyon à Dardilly", "Google Maps: Bistrobee, Porte de Lyon, Dardilly");
     f.loading = "lazy";
     f.referrerPolicy = "no-referrer-when-downgrade";
     f.allowFullscreen = true;
@@ -255,10 +285,10 @@ const CONFIG = {
     const box = document.createElement("div");
     box.className = "viewer"; box.hidden = true;
     box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Carte en grand");
-    box.innerHTML = '<button class="v-close" type="button" aria-label="Fermer">×</button>' +
-      '<button class="v-prev" type="button" aria-label="Page précédente">‹</button>' +
+    box.innerHTML = '<button class="v-close" type="button" aria-label="' + T("Fermer", "Close") + '">×</button>' +
+      '<button class="v-prev" type="button" aria-label="' + T("Page précédente", "Previous page") + '">‹</button>' +
       '<div class="v-stage"><img alt=""></div>' +
-      '<button class="v-next" type="button" aria-label="Page suivante">›</button>' +
+      '<button class="v-next" type="button" aria-label="' + T("Page suivante", "Next page") + '">›</button>' +
       '<p class="v-count"></p>';
     document.body.appendChild(box);
     const img = $("img", box), count = $(".v-count", box);
@@ -351,4 +381,44 @@ document.querySelectorAll(".stepper [data-step]").forEach(b => b.addEventListene
   const top = () => { if (!location.hash) window.scrollTo({ top: 0, left: 0, behavior: "instant" }); };
   top();
   window.addEventListener("pageshow", top);
+})();
+
+
+/* Menu du jour : lu dans le Google Sheet du restaurant (colonnes Rubrique, Plat, Détail, Prix).
+   Rubrique « Titre » = titre du jour, « Note » = petite phrase sous le titre. */
+(function () {
+  const box = document.querySelector("[data-jour-sheet]");
+  if (!box || !box.dataset.jourSheet) return;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function parseCSV(t) {
+    const rows = []; let row = [], cur = "", q = false;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (q) { if (c === '"') { if (t[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+      else if (c === '"') q = true; else if (c === ",") { row.push(cur); cur = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && t[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+      else cur += c;
+    }
+    if (cur || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+  fetch(box.dataset.jourSheet, { cache: "no-store" }).then(r => r.ok ? r.text() : Promise.reject()).then(csv => {
+    const rows = parseCSV(csv).slice(1).map(r => r.map(x => (x || "").trim())).filter(r => r.some(Boolean));
+    let title = "", note = "", html = "", cat = null, n = 0;
+    rows.forEach(([rub, plat, det, prix]) => {
+      const R = (rub || "").toLowerCase();
+      if (R === "titre") { title = plat; return; }
+      if (R === "note") { note = plat; return; }
+      if (!plat) return;
+      if (rub !== cat) { if (cat !== null) html += "</div>"; cat = rub; html += (rub ? `<h3 class="menu-cat">${esc(rub)}</h3>` : "") + '<div class="cards">'; }
+      const p = prix ? `<div class="prices"><div><span class="pr">${esc(prix.replace(/\s*€\s*$/, ""))} EUR</span></div></div>` : "";
+      html += `<div class="card"><div class="card-col"><h3>${esc(plat)}</h3>${det ? `<p class="desc">${esc(det)}</p>` : ""}</div>${p}</div>`;
+      n++;
+    });
+    if (!n) return;
+    html += "</div>";
+    const live = box.querySelector(".jour-live");
+    live.innerHTML = (title ? `<p class="jour-title">${esc(title)}</p>` : "") + (note ? `<p class="jour-note">${esc(note)}</p>` : "") + html;
+    live.hidden = false; box.querySelector(".jour-fallback").hidden = true;
+  }).catch(() => {});
 })();
