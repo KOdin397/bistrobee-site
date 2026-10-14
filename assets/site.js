@@ -26,7 +26,9 @@ const CONFIG = {
   WEEKEND_SEASON_MONTHS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 12],   // week-ends ouverts sauf octobre et novembre
   MAX_GUESTS_ONLINE: 12,                // au-delà : on invite à téléphoner
   // Statistiques de visite sans cookie, envoyées au tableau de bord K'Odin
-  TRACK_URL: "https://k-odin.base44.app/functions/trackSiteEvent"
+  TRACK_URL: "https://k-odin.base44.app/functions/trackSiteEvent",
+  // Copie des demandes de réservation dans le module Réservations de K'Odin
+  BOOKING_URL: "https://k-odin.base44.app/functions/createRestaurantBooking"
 };
 
 /* Statistiques sans cookie : aucune donnée personnelle, aucun identifiant stocké
@@ -239,6 +241,9 @@ document.addEventListener("click", function (e) {
           contact: T("<strong>Merci !</strong> Nous avons bien reçu votre message. Nous revenons vers vous au plus vite.", "<strong>Thank you!</strong> We have received your message and will reply shortly."),
           newsletter: T("Merci, votre inscription est enregistrée.", "Thank you, you are now subscribed.")
         };
+        if (kind === "reservation" && CONFIG.BOOKING_URL) {
+          try { fetch(CONFIG.BOOKING_URL, { method: "POST", keepalive: true, headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign({}, data, { lang: document.documentElement.lang || "fr" })) }).catch(() => {}); } catch (e2) {}
+        }
         bbTrack(kind === "reservation" ? "reservation" : kind, kind === "reservation" ? { guests: +data["Personnes"] || 0, booking_date: data["Date"] || "" } : {});
         form.reset(); fillSlots();
         say(form, ok[kind]);
