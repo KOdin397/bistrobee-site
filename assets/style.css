@@ -643,3 +643,15 @@ html.v-lock{overflow:hidden}
 .jour-live .jour-note{text-align:center;color:var(--muted);margin:0 0 22px}
 .jour-live .menu-cat{font-family:var(--f-title);font-weight:400;text-transform:uppercase;letter-spacing:.08em;font-size:1.05rem;text-align:center;margin:26px 0 14px;color:var(--ink)}
 .jour-live .cards{grid-template-columns:1fr}
+/* FAQ */
+.faq{padding-block:90px;background:var(--white,#fff)}
+.faq-wrap{max-width:860px}
+.faq-sub{text-align:center;color:var(--muted);margin:18px 0 34px}
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-item>summary{cursor:pointer;list-style:none;padding:20px 4px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-item>summary::-webkit-details-marker{display:none}
+.faq-item>summary .chev{width:12px;height:12px;flex-shrink:0;transition:transform .2s}
+.faq-item[open]>summary .chev{transform:rotate(180deg)}
+.faq-item>p{margin:0 4px 22px;color:var(--muted);line-height:1.6}
+@media (max-width:520px){.faq{padding-block:60px}}
