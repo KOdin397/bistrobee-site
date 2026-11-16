@@ -237,7 +237,7 @@ document.addEventListener("click", function (e) {
         const j = await r.json().catch(() => ({}));
         if (!r.ok || String(j.success) !== "true") throw new Error(j.message || "Envoi refusé");
         const ok = {
-          reservation: T("<strong>Merci !</strong> Votre demande de réservation est bien envoyée. Elle sera confirmée par téléphone ou par email. Pour une réservation le jour même, appelez-nous.", "<strong>Thank you!</strong> Your booking request has been sent. We will confirm it by phone or email. For a same-day booking, please call us."),
+          reservation: T("<strong>Merci !</strong> Votre demande de réservation est bien envoyée. Elle sera confirmée par téléphone ou par email. Pour une réservation le jour même, appelez-nous. Pour modifier ou annuler votre demande, écrivez à restaurant.bistrobee@gmail.com ou appelez le 04 72 17 29 04.", "<strong>Thank you!</strong> Your booking request has been sent. We will confirm it by phone or email. For a same-day booking, please call us. To change or cancel your request, email restaurant.bistrobee@gmail.com or call +33 4 72 17 29 04."),
           contact: T("<strong>Merci !</strong> Nous avons bien reçu votre message. Nous revenons vers vous au plus vite.", "<strong>Thank you!</strong> We have received your message and will reply shortly."),
           newsletter: T("Merci, votre inscription est enregistrée.", "Thank you, you are now subscribed.")
         };
